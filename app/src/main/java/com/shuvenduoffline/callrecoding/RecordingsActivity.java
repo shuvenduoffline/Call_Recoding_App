@@ -33,6 +33,7 @@ public class RecordingsActivity extends AppCompatActivity {
                         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                                 Uri.parse("package:"+getPackageName()));
 
+                        //ask user to give permission
                         startActivityForResult(intent,PERMISSION_REQUEST_CODE);
 
                     }
