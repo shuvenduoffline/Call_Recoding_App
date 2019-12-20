@@ -1,9 +1,9 @@
 package com.shuvenduoffline.callrecoding.Service;
 
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.media.MediaRecorder;
 import android.os.Environment;
@@ -19,27 +19,27 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
 
-import com.shuvenduoffline.callrecoding.MyNotification;
+import com.shuvenduoffline.callrecoding.Notification.MyNotification;
+import com.shuvenduoffline.callrecoding.OutgoingReceiver;
 import com.shuvenduoffline.callrecoding.R;
 import com.shuvenduoffline.callrecoding.datamodel.CallLog;
 
 import java.io.File;
-import java.util.Calendar;
 import java.util.Date;
 
-import static com.shuvenduoffline.callrecoding.MyNotification.RECORDING_NOTIFICATION;
+import static com.shuvenduoffline.callrecoding.Notification.MyNotification.RECORDING_NOTIFICATION;
 
 public class RecordingService extends Service {
 
 
-    private WindowManager windowManager;
-    private View recoderview;
-    private CallLog phoneCall;
-    boolean isRecording = false;
-    MediaRecorder mediaRecorder;
-    boolean isPopUpShowing = false;
+    private static WindowManager windowManager;
+    private static View recoderview;
+    private static CallLog phoneCall;
+    private static boolean isRecording = false;
+    private static MediaRecorder mediaRecorder;
+    private static boolean isPopUpShowing = false;
+    private static Context ctx;
 
 
     @Nullable
@@ -51,16 +51,17 @@ public class RecordingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        ctx = getApplicationContext();
 
     }
 
 
-    public void ShowPopUpForRecording() {
+    public static void ShowPopUpForRecording(final String number) {
         //recoding pop up view
 
         if (!isPopUpShowing) {
             isPopUpShowing = true;
-            recoderview = LayoutInflater.from(this).inflate(R.layout.pop_up_layout, null);
+            recoderview = LayoutInflater.from(ctx).inflate(R.layout.pop_up_layout, null);
 
             WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.WRAP_CONTENT,
@@ -72,7 +73,7 @@ public class RecordingService extends Service {
 
             params.gravity = Gravity.CENTER;
 
-            windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+            windowManager = (WindowManager) ctx.getSystemService(WINDOW_SERVICE);
 
             windowManager.addView(recoderview, params);
 
@@ -83,19 +84,21 @@ public class RecordingService extends Service {
             btnStartRecord.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(RecordingService.this, "Starting Recording!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ctx, "Starting Recording!", Toast.LENGTH_SHORT).show();
                     if (recoderview != null && windowManager != null) {
                         windowManager.removeView(recoderview);
                     }
                     isPopUpShowing = false;
-                    startRecording(new CallLog());
+                    CallLog clg = new CallLog();
+                    clg.setPhonenumber(number);
+                    startRecording(clg);
                 }
             });
 
             btnCancle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(RecordingService.this, "Cancel", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ctx, "Cancel", Toast.LENGTH_SHORT).show();
                     //To dismiss the recording popup
                     if (recoderview != null && windowManager != null) {
                         windowManager.removeView(recoderview);
@@ -122,7 +125,7 @@ public class RecordingService extends Service {
 
                 if (TelephonyManager.CALL_STATE_IDLE == state) {
                     // called when call state is idle , i.e when we hang up
-                    if ( isPopUpShowing && recoderview != null && windowManager != null) {
+                    if (isPopUpShowing && recoderview != null && windowManager != null) {
                         windowManager.removeView(recoderview);
                         isPopUpShowing = false;
                     }
@@ -135,12 +138,18 @@ public class RecordingService extends Service {
                 } else if (state == TelephonyManager.CALL_STATE_RINGING) {
 
                     //when any call rings show recording popup
-                    ShowPopUpForRecording();
+                    ShowPopUpForRecording("ABC");
                 }
 
 
             }
         }, PhoneStateListener.LISTEN_CALL_STATE);
+
+
+        //Start the Outgoing Call Reciver
+        OutgoingReceiver outgoingReceiver = new OutgoingReceiver();
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
+        getApplicationContext().registerReceiver(outgoingReceiver, intentFilter);
 
         //todo chnage to sticky
         return START_NOT_STICKY;
@@ -155,6 +164,10 @@ public class RecordingService extends Service {
             windowManager.removeView(recoderview);
         }
 
+        //Removing the reciver
+        OutgoingReceiver outgoingReceiver = new OutgoingReceiver();
+        getApplicationContext().unregisterReceiver(outgoingReceiver);
+
     }
 
 
@@ -163,15 +176,16 @@ public class RecordingService extends Service {
         if (isRecording) {
             new MyNotification(getApplicationContext()).CancleNotification(RECORDING_NOTIFICATION);
             try {
-                this.phoneCall.setEnd_time(new Date().getTime());
-                this.phoneCall.setName(String.valueOf(new Date().getTime()));
-                this.phoneCall.setPhonenumber(phonenumber);
+                phoneCall.setEnd_time(new Date().getTime());
+                phoneCall.setName(String.valueOf(new Date().getTime()));
+                if (phonenumber != null && phonenumber.trim().length() > 8)
+                    phoneCall.setPhonenumber(phonenumber);
                 mediaRecorder.stop();
                 mediaRecorder.reset();
                 mediaRecorder.release();
                 mediaRecorder = null;
                 isRecording = false;
-                this.phoneCall.save(getBaseContext());
+                phoneCall.save(getBaseContext());
                 Toast.makeText(this, "Call Recording is saved!", Toast.LENGTH_SHORT).show();
                 // displayNotification(phoneCall);
             } catch (Exception e) {
@@ -182,20 +196,20 @@ public class RecordingService extends Service {
         phoneCall = null;
     }
 
-    private void startRecording(CallLog phoneCall) {
+    private static void startRecording(CallLog phonecall) {
         if (!isRecording) {
 
             isRecording = true;
-            this.phoneCall = phoneCall;
+            phoneCall = phonecall;
             File file = null;
             try {
-                this.phoneCall.setName(String.valueOf(new Date().getTime()));
-                this.phoneCall.setStart_time(new Date().getTime());
+                phoneCall.setName(String.valueOf(new Date().getTime()));
+                phoneCall.setStart_time(new Date().getTime());
                 File dir = getFilesDirectory();
                 mediaRecorder = null;
                 mediaRecorder = new MediaRecorder();
                 file = File.createTempFile(String.valueOf(new Date().getTime()), ".3gp", dir);
-                this.phoneCall.setFilepath(file.getAbsolutePath());
+                phoneCall.setFilepath(file.getAbsolutePath());
                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
                 mediaRecorder.setAudioSamplingRate(8000);
                 mediaRecorder.setAudioEncodingBitRate(12200);//12200
@@ -208,22 +222,22 @@ public class RecordingService extends Service {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                       try{
-                           mediaRecorder.start();
-                       }catch (Exception e){
-                           Toast.makeText(RecordingService.this, "Unable to Record!", Toast.LENGTH_SHORT).show();
-                           e.printStackTrace();
-                       }
+                        try {
+                            mediaRecorder.start();
+                        } catch (Exception e) {
+                            Toast.makeText(ctx, "Unable to Record!", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
                     }
-                },1000);
+                }, 1000);
 
-                new MyNotification(getApplicationContext()).ShowNotificationForRecordOnging();
+                new MyNotification(ctx).ShowNotificationForRecordOnging();
             } catch (Exception e) {
-                Toast.makeText(this, "Something went wrong!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, "Something went wrong!", Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
                 isRecording = false;
                 if (file != null) file.delete();
-                this.phoneCall = null;
+                phoneCall = null;
                 isRecording = false;
                 mediaRecorder = null;
             }
@@ -231,10 +245,7 @@ public class RecordingService extends Service {
     }
 
 
-
-
-
-    public File getFilesDirectory() {
+    public static File getFilesDirectory() {
 
         String filesDir = (new StringBuilder()).append(Environment.getExternalStorageDirectory().getAbsolutePath()).append("/").append("calls").append("/").toString();
         File myDir = new File(filesDir);

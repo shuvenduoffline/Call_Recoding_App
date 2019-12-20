@@ -145,10 +145,14 @@ public class RecordingsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_on_off) {
             if (isMyServiceRunning(RecordingService.class)) {
+
+                //stop the service when its running
                 stopService(new Intent(getApplicationContext(), RecordingService.class));
                 item.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_stand_by_black));
                 Toast.makeText(this, "Call Recording Service is Stop Now!", Toast.LENGTH_SHORT).show();
             } else {
+
+                //start activity when not running already
                 startService(new Intent(getApplicationContext(), RecordingService.class));
                 Toast.makeText(this, "Call Recording Service is Active Now!", Toast.LENGTH_SHORT).show();
                 item.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_power));

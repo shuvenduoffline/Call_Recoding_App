@@ -16,7 +16,7 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.shuvenduoffline.callrecoding.Database.Database;
-import com.shuvenduoffline.callrecoding.MyNotification;
+import com.shuvenduoffline.callrecoding.Notification.MyNotification;
 import com.shuvenduoffline.callrecoding.R;
 import com.shuvenduoffline.callrecoding.datamodel.CallLog;
 
