@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Call Recoding</string>
     <string name="title_activity_recordings">Call Recordings</string>
+    <string name="notification_title">Call Recoder</string>
+    <string name="notification_text">Call Recorder is recording this call.</string>
+    <string name="string_on_off">On/Off</string>
+    <string name="notification_record_playing">Call Recorder</string>
+    <string name="notification_record_playing_decription">Playing Call Recording</string>
 </resources>

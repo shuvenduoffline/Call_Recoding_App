@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+
+        android:padding="5dp"
+        app:cardBackgroundColor="#00BCD4"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="4dp">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:enabled="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:layout_margin="1.5dp"
+            app:cardCornerRadius="10dp">
+
+            <LinearLayout
+                android:layout_margin="7dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="5"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:layout_weight=".1"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_play"
+                    android:layout_margin="1dp"
+                    android:padding="1dp"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:background="@android:color/transparent"
+                    android:id="@+id/btn_play"
+                    android:scaleType="centerInside"/>
+
+                <LinearLayout
+                    android:layout_weight="4.6"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="6dp"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/record_name"
+                        android:text="123456789.mp3"
+                        android:textSize="20sp"
+                        android:textColor="@android:color/background_dark"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/caller_id"
+                        android:text="Caller 8158090295"
+                        android:textColor="@android:color/background_dark"
+                        android:textSize="16dp"/>
+                    android:textColor="@android:color/background_dark"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:id="@+id/call_duration"
+                        android:layout_height="wrap_content"
+                        android:text="20 December · 23 sec"
+                        android:textSize="15dp"/>
+
+                </LinearLayout>
+
+                <ImageButton
+                    android:layout_weight=".3"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/ic_pencil"
+                    android:layout_margin="1dp"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:layout_gravity="center"
+                    android:id="@+id/btn_edit"
+                    android:padding="1dp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerInside"/>
+
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>
