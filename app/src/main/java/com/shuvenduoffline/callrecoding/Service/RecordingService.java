@@ -40,6 +40,7 @@ public class RecordingService extends Service {
     private static MediaRecorder mediaRecorder;
     private static boolean isPopUpShowing = false;
     private static Context ctx;
+    private OutgoingReceiver outgoingReceiver;
 
 
     @Nullable
@@ -147,9 +148,9 @@ public class RecordingService extends Service {
 
 
         //Start the Outgoing Call Reciver
-        OutgoingReceiver outgoingReceiver = new OutgoingReceiver();
+         outgoingReceiver = new OutgoingReceiver();
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
-        getApplicationContext().registerReceiver(outgoingReceiver, intentFilter);
+        ctx.registerReceiver(outgoingReceiver, intentFilter);
 
         //todo chnage to sticky
         return START_NOT_STICKY;
@@ -165,8 +166,7 @@ public class RecordingService extends Service {
         }
 
         //Removing the reciver
-        OutgoingReceiver outgoingReceiver = new OutgoingReceiver();
-        getApplicationContext().unregisterReceiver(outgoingReceiver);
+        ctx.unregisterReceiver(outgoingReceiver);
 
     }
 
